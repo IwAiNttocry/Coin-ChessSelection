@@ -1,43 +1,37 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
 public class ClickObject : MonoBehaviour
 {
+    private Camera _camera;
+
+    void Start()
+    {
+        _camera = Camera.main;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
         {
-            GameObject clicked = getClickedObject(out RaycastHit hit);
+            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
 
-            if (clicked != null && clicked.CompareTag("ChessPiece"))
+            if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity))
             {
-                print("Clicked: " + clicked.name);
+                Debug.Log("Hit: " + hit.collider.gameObject.name + " | Tag: " + hit.collider.gameObject.tag);
+
+                if (hit.collider.CompareTag("ChessPiece"))
+                {
+                    print("Clicked");
+                }
+                else
+                {
+                    print("Click Off");
+                }
             }
             else
             {
-                print("Click Off");
+                Debug.Log("Ray hit nothing");
             }
         }
-    }
-
-    GameObject getClickedObject(out RaycastHit hit)
-    {
-        GameObject target = null;
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray.origin, ray.direction, out hit, 100f))
-        {
-            if (!isPointerOverUIObject()) { target = hit.collider.gameObject; }
-        }
-        return target;
-    }
-
-    private bool isPointerOverUIObject()
-    {
-        PointerEventData ped = new PointerEventData(EventSystem.current);
-        ped.position = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(ped, results);
-        return results.Count > 0;
     }
 }
