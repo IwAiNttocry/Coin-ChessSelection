@@ -5,10 +5,11 @@ public class SelectChess : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
     private float hoverTimer = 0f;
+    private Transform hoveredPiece = null;
 
     void Update()
     {
-        
+        // Hover check every 0.5 sec
         hoverTimer += Time.deltaTime;
         if (hoverTimer >= 0.5f)
         {
@@ -16,18 +17,35 @@ public class SelectChess : MonoBehaviour
             Ray hoverRay = mainCamera.ScreenPointToRay(Input.mousePosition);
             RaycastHit[] hoverHits = Physics.RaycastAll(hoverRay, Mathf.Infinity);
 
-            if (hoverHits.Length > 0)
+            Transform newHover = null;
+            foreach (RaycastHit hit in hoverHits)
             {
+                if (hit.transform.CompareTag("ChessPiece"))
+                {
+                    newHover = hit.transform;
+                    break;
+                }
+            }
+
+            // Just started hovering
+            if (newHover != null && hoveredPiece == null)
+            {
+                hoveredPiece = newHover;
+                hoveredPiece.position += new Vector3(0, 0.5f, 0);
                 print("Is Hover");
             }
-            else
+            // Stopped hovering
+            else if (newHover == null && hoveredPiece != null)
             {
+                hoveredPiece.position -= new Vector3(0, 0.5f, 0);
+                hoveredPiece = null;
                 print("Isn't Hover");
             }
         }
 
-        
-        
+
+
+        // Click
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             Ray clickRay = mainCamera.ScreenPointToRay(Input.mousePosition);
