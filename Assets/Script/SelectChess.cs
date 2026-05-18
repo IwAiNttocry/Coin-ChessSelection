@@ -4,23 +4,30 @@ using UnityEngine.EventSystems;
 public class SelectChess : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
+    private float hoverTimer = 0f;
 
     void Update()
     {
-        // Hover
-        Ray hoverRay = mainCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit[] hoverHits = Physics.RaycastAll(hoverRay, Mathf.Infinity);
-
-        if (hoverHits.Length > 0)
+        
+        hoverTimer += Time.deltaTime;
+        if (hoverTimer >= 0.5f)
         {
-            print("Is Hover");
-        }
-        else
-        {
-            print("Isn't Hover");
+            hoverTimer = 0f;
+            Ray hoverRay = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit[] hoverHits = Physics.RaycastAll(hoverRay, Mathf.Infinity);
+
+            if (hoverHits.Length > 0)
+            {
+                print("Is Hover");
+            }
+            else
+            {
+                print("Isn't Hover");
+            }
         }
 
-        // Click
+        
+        
         if (Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             Ray clickRay = mainCamera.ScreenPointToRay(Input.mousePosition);
