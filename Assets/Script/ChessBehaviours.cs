@@ -5,118 +5,69 @@ public class SelectChess : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
 
-    private IChessState _currentState;
-    public IChessState NextState { get; private set; }
+    private Transform _hoveredPiece;
+    private Transform _selectedPiece;
+    private float _timer;
 
-    public interface IChessState
+    void Update()
     {
-        void OnEnter(SelectChess ctx);
-        void OnUpdate(SelectChess ctx);
-        void OnExit(SelectChess ctx);
+        CheckHover();
+        CheckClick();
     }
 
-    private class IdleState : IChessState
+    void CheckHover()
     {
-        public void OnEnter(SelectChess ctx) { }
+        _timer += Time.deltaTime;
+        if (_timer < 0.5f) return;
+        _timer = 0f;
 
-        public void OnUpdate(SelectChess ctx)
+        Transform hit = GetPieceUnderMouse();
+
+        // Mouse entered a piece
+        if (hit != null && _hoveredPiece == null && _selectedPiece == null)
         {
-            Transform hit = ctx.RaycastForPiece();
-            if (hit != null)
-                ctx.TransitionTo(new HoveredState(hit));
+            _hoveredPiece = hit;
+            _hoveredPiece.position += Vector3.up * 0.5f;
         }
 
-        public void OnExit(SelectChess ctx) { }
-    }
-
-    private class HoveredState : IChessState
-    {
-        private readonly Transform _piece;
-        private float _timer;
-
-        public HoveredState(Transform piece) => _piece = piece;
-
-        public void OnEnter(SelectChess ctx)
+        // Mouse left the piece
+        if (hit == null && _hoveredPiece != null && _selectedPiece == null)
         {
-            _piece.position += new Vector3(0, 0.5f, 0);
-        }
-
-        public void OnUpdate(SelectChess ctx)
-        {
-            if (ctx.IsClicked())
-            {
-                ctx.TransitionTo(new SelectedState(_piece));
-                return;
-            }
-
-            _timer += Time.deltaTime;
-            if (_timer < 0.5f) return;
-            _timer = 0f;
-
-            Transform hit = ctx.RaycastForPiece();
-            bool stillHere = hit == _piece || ctx.IsMouseNearPiece(_piece);
-            if (!stillHere)
-                ctx.TransitionTo(new IdleState());
-        }
-
-        public void OnExit(SelectChess ctx)
-        {
-            if (ctx.NextState is not SelectedState)
-                _piece.position -= new Vector3(0, 0.5f, 0);
+            _hoveredPiece.position -= Vector3.up * 0.5f;
+            _hoveredPiece = null;
         }
     }
 
-    private class SelectedState : IChessState
+    void CheckClick()
     {
-        private readonly Transform _piece;
+        if (!Input.GetMouseButtonDown(0)) return;
+        if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        public SelectedState(Transform piece) => _piece = piece;
+        Transform hit = GetPieceUnderMouse();
 
-        public void OnEnter(SelectChess ctx) { }
-
-        public void OnUpdate(SelectChess ctx)
+        // Select
+        if (hit != null && _selectedPiece == null)
         {
-            if (!ctx.IsClicked()) return;
-            ctx.TransitionTo(new IdleState());
+            _selectedPiece = hit;
+            // If not already lifted by hover, lift it now
+            if (_hoveredPiece == null)
+                _selectedPiece.position += Vector3.up * 0.5f;
+            _hoveredPiece = null;
         }
-
-        public void OnExit(SelectChess ctx)
+        // Deselect
+        else if (_selectedPiece != null)
         {
-            _piece.position -= new Vector3(0, 0.5f, 0);
+            _selectedPiece.position -= Vector3.up * 0.5f;
+            _selectedPiece = null;
         }
     }
 
-    void Start() => TransitionTo(new IdleState());
-
-    void Update() => _currentState?.OnUpdate(this);
-
-    public void TransitionTo(IChessState newState)
-    {
-        NextState = newState;
-        _currentState?.OnExit(this);
-        _currentState = newState;
-        NextState = null;
-        _currentState.OnEnter(this);
-    }
-
-    public Transform RaycastForPiece()
+    Transform GetPieceUnderMouse()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         foreach (RaycastHit hit in Physics.RaycastAll(ray, Mathf.Infinity))
             if (hit.transform.CompareTag("ChessPiece"))
                 return hit.transform;
         return null;
-    }
-
-    public bool IsMouseNearPiece(Transform piece)
-    {
-        Vector3 screenPos = mainCamera.WorldToScreenPoint(piece.position);
-        return Vector2.Distance(Input.mousePosition, screenPos) < 60f;
-    }
-
-    public bool IsClicked()
-    {
-        return Input.GetMouseButtonDown(0)
-            && !EventSystem.current.IsPointerOverGameObject();
     }
 }
