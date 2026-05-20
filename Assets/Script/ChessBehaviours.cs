@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ChessBehaviours : MonoBehaviour
+public class SelectChess : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
 
     private Transform _hoveredPiece;
     private Transform _selectedPiece;
-    private float _timer;
+    private Vector2Int _lastSquare = -Vector2Int.one;
+    private Vector3 _lastMousePos;
 
     void Update()
     {
@@ -17,17 +18,27 @@ public class ChessBehaviours : MonoBehaviour
 
     void CheckHover()
     {
+        if (_selectedPiece != null) return;
+
+        if (Vector3.Distance(Input.mousePosition, _lastMousePos) < 5f) return;
+        _lastMousePos = Input.mousePosition;
+
+        //Option 4 — only run when mouse enters a new square
+        //Vector2Int currentSquare = GetSquareUnderMouse();
+        //if (currentSquare == _lastSquare) return;
+        //_lastSquare = currentSquare;
+
         Transform hit = GetPieceUnderMouse();
 
-        
-        if (hit != null && _hoveredPiece == null && _selectedPiece == null)
+        // Mouse entered a piece
+        if (hit != null && _hoveredPiece == null)
         {
             _hoveredPiece = hit;
             _hoveredPiece.position += Vector3.up * 0.5f;
         }
 
-        
-        if (hit == null && _hoveredPiece != null && _selectedPiece == null)
+        // Mouse left the piece
+        if (hit == null && _hoveredPiece != null)
         {
             _hoveredPiece.position -= Vector3.up * 0.5f;
             _hoveredPiece = null;
@@ -41,21 +52,31 @@ public class ChessBehaviours : MonoBehaviour
 
         Transform hit = GetPieceUnderMouse();
 
-        
+        // Select
         if (hit != null && _selectedPiece == null)
         {
             _selectedPiece = hit;
-            
             if (_hoveredPiece == null)
                 _selectedPiece.position += Vector3.up * 0.5f;
             _hoveredPiece = null;
         }
-        
+        // Deselect
         else if (_selectedPiece != null)
         {
             _selectedPiece.position -= Vector3.up * 0.5f;
             _selectedPiece = null;
         }
+    }
+
+    Vector2Int GetSquareUnderMouse()
+    {
+        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit))
+            return new Vector2Int(
+                Mathf.FloorToInt(hit.point.x),
+                Mathf.FloorToInt(hit.point.z)
+            );
+        return -Vector2Int.one;
     }
 
     Transform GetPieceUnderMouse()
