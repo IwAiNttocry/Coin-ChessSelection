@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SelectChess : MonoBehaviour
+public class ChessBehaviours : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
 
@@ -17,20 +17,16 @@ public class SelectChess : MonoBehaviour
 
     void CheckHover()
     {
-        _timer += Time.deltaTime;
-        if (_timer < 0.5f) return;
-        _timer = 0f;
-
         Transform hit = GetPieceUnderMouse();
 
-        // Mouse entered a piece
+        
         if (hit != null && _hoveredPiece == null && _selectedPiece == null)
         {
             _hoveredPiece = hit;
             _hoveredPiece.position += Vector3.up * 0.5f;
         }
 
-        // Mouse left the piece
+        
         if (hit == null && _hoveredPiece != null && _selectedPiece == null)
         {
             _hoveredPiece.position -= Vector3.up * 0.5f;
@@ -45,16 +41,16 @@ public class SelectChess : MonoBehaviour
 
         Transform hit = GetPieceUnderMouse();
 
-        // Select
+        
         if (hit != null && _selectedPiece == null)
         {
             _selectedPiece = hit;
-            // If not already lifted by hover, lift it now
+            
             if (_hoveredPiece == null)
                 _selectedPiece.position += Vector3.up * 0.5f;
             _hoveredPiece = null;
         }
-        // Deselect
+        
         else if (_selectedPiece != null)
         {
             _selectedPiece.position -= Vector3.up * 0.5f;
