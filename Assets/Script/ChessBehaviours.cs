@@ -17,16 +17,10 @@ public class SelectChess : MonoBehaviour
 
     private class IdleState : IChessState
     {
-        private float _timer;
-
         public void OnEnter(SelectChess ctx) { }
 
         public void OnUpdate(SelectChess ctx)
         {
-            _timer += Time.deltaTime;
-            if (_timer < 0.5f) return;
-            _timer = 0f;
-
             Transform hit = ctx.RaycastForPiece();
             if (hit != null)
                 ctx.TransitionTo(new HoveredState(hit));
