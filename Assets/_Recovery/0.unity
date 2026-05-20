@@ -696,7 +696,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1880130640}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 31dacdacd8fbe08468c7a44672e566ee, type: 3}
+  m_Script: {fileID: 11500000, guid: 0ff7aec90d8ede243aad7f58f02e7ee4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SelectObject
   mainCamera: {fileID: 513924975}
