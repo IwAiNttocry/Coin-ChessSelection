@@ -23,16 +23,15 @@ public class ChessBehaviour : MonoBehaviour
     
     public void OnSelect(bool alreadyLifted)
     {
-        if (!alreadyLifted)
-            transform.position += LiftOffset;
-
-        Debug.Log($"{name} selected");
+        if (!alreadyLifted){transform.position += LiftOffset;}            
+        
+    
     }
 
         public void OnDeselect()
     {
         transform.position -= LiftOffset;
-        Debug.Log($"{name} deselected");
+        
     }
 
     

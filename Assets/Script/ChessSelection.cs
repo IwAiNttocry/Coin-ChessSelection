@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class ChessSelector : MonoBehaviour
 {
-    [SerializeField] public Camera mainCamera;
+    [SerializeField] private Camera mainCamera;
 
     private ChessBehaviour _hoveredPiece;
     private ChessBehaviour _selectedPiece;
@@ -53,7 +53,6 @@ public class ChessSelector : MonoBehaviour
 
     void CheckClick()
     {
-        // Right click — deselect
         if (Input.GetMouseButtonDown(1))
         {
             if (_selectedPiece != null)
@@ -69,7 +68,6 @@ public class ChessSelector : MonoBehaviour
 
         ChessBehaviour hit = GetPieceUnderMouse();
 
-        // Double-click: second click on the already-selected piece within threshold
         if (_waitingForDoubleClick && hit == _selectedPiece)
         {
             _waitingForDoubleClick = false;
@@ -78,13 +76,10 @@ public class ChessSelector : MonoBehaviour
             return;
         }
 
-        // Select a new piece
         if (hit != null && _selectedPiece == null)
         {
-            _selectedPiece = hit;
-
-            // If it was hovered, the piece is already lifted — just take ownership
             bool wasHovered = (_hoveredPiece == hit);
+            _selectedPiece = hit;
             _selectedPiece.OnSelect(wasHovered);
             _hoveredPiece = null;
 
@@ -96,7 +91,6 @@ public class ChessSelector : MonoBehaviour
     void TickDoubleClickTimer()
     {
         if (!_waitingForDoubleClick) return;
-
         _doubleClickTimer += Time.deltaTime;
         if (_doubleClickTimer >= DoubleClickThreshold)
         {
@@ -111,10 +105,7 @@ public class ChessSelector : MonoBehaviour
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit))
-            return new Vector2Int(
-                Mathf.FloorToInt(hit.point.x),
-                Mathf.FloorToInt(hit.point.z)
-            );
+            return new Vector2Int(Mathf.FloorToInt(hit.point.x), Mathf.FloorToInt(hit.point.z));
         return -Vector2Int.one;
     }
 
@@ -122,8 +113,10 @@ public class ChessSelector : MonoBehaviour
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         foreach (RaycastHit hit in Physics.RaycastAll(ray, Mathf.Infinity))
-            if (hit.transform.CompareTag("ChessPiece"))
-                return hit.transform.GetComponent<ChessBehaviour>();
+        {
+            ChessBehaviour piece = hit.transform.GetComponent<ChessBehaviour>();
+            if (piece != null) return piece;
+        }
         return null;
     }
 }

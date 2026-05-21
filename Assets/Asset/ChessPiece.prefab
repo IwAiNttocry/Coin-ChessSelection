@@ -127,3 +127,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ChessBehaviour
   mainCamera: {fileID: 7130714654557573882, guid: 6753b1ae78e303d48a224e32908572d1, type: 3}
   selector: {fileID: 8814442984692711642, guid: 9bbdfbe312777574d83982641e93ebc7, type: 3}
+  camera1: {fileID: 3734247493772984830, guid: 8e3724fdfa7bb3c4f82c2642a98321c5, type: 3}
