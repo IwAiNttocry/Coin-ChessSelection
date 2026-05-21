@@ -4,7 +4,7 @@ public class ChessBehaviour : MonoBehaviour
 {
     
     [SerializeField] private Camera mainCamera;
-    [SerializeField] private ChessSelector selector;
+    [SerializeField] private ChessSelection selctor;
 
     private static readonly Vector3 LiftOffset = Vector3.up * 0.5f;
 
@@ -24,20 +24,16 @@ public class ChessBehaviour : MonoBehaviour
     public void OnSelect(bool alreadyLifted)
     {
         if (!alreadyLifted){transform.position += LiftOffset;}            
-        
-    
     }
 
         public void OnDeselect()
     {
-        transform.position -= LiftOffset;
-        
+        transform.position -= LiftOffset; 
     }
 
     
     public void OnDoubleClick()
     {
-        Debug.Log($"{name} double-clicked");
-        
+        Debug.Log($"{name} double-clicked"); 
     }
 }

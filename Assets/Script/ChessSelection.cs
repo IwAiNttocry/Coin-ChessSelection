@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ChessSelector : MonoBehaviour
+public class ChessSelection : MonoBehaviour
 {
     [SerializeField] private Camera mainCamera;
 
@@ -88,7 +88,7 @@ public class ChessSelector : MonoBehaviour
         }
     }
 
-    void TickDoubleClickTimer()
+    void TickDoubleClickTimer() // Wait for The Click
     {
         if (!_waitingForDoubleClick) return;
         _doubleClickTimer += Time.deltaTime;
