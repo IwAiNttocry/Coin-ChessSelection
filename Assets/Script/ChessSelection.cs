@@ -1,50 +1,55 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class SelectChess : MonoBehaviour
+public class ChessSelector : MonoBehaviour
 {
-    [SerializeField] private Camera mainCamera;
+    [SerializeField] public Camera mainCamera;
 
-    private Transform _hoveredPiece;
-    private Transform _selectedPiece;
+    private ChessBehaviour _hoveredPiece;
+    private ChessBehaviour _selectedPiece;
     private Vector2Int _lastSquare = -Vector2Int.one;
     private Vector3 _lastMousePos;
 
     private float _doubleClickTimer = 0f;
-    private float _doubleClickThreshold = 0.3f;
+    private const float DoubleClickThreshold = 0.3f;
     private bool _waitingForDoubleClick = false;
 
     void Update()
     {
         CheckHover();
         CheckClick();
+        TickDoubleClickTimer();
     }
+
+    // ─── Hover ────────────────────────────────────────────────────────────────
 
     void CheckHover()
     {
         if (_selectedPiece != null) return;
-
         if (Vector3.Distance(Input.mousePosition, _lastMousePos) < 5f) return;
+
         _lastMousePos = Input.mousePosition;
 
         Vector2Int currentSquare = GetSquareUnderMouse();
         if (currentSquare == _lastSquare) return;
         _lastSquare = currentSquare;
 
-        Transform hit = GetPieceUnderMouse();
+        ChessBehaviour hit = GetPieceUnderMouse();
 
         if (hit != null && _hoveredPiece == null)
         {
             _hoveredPiece = hit;
-            _hoveredPiece.position += Vector3.up * 0.5f;
+            _hoveredPiece.OnHoverEnter();
         }
 
         if (hit == null && _hoveredPiece != null)
         {
-            _hoveredPiece.position -= Vector3.up * 0.5f;
+            _hoveredPiece.OnHoverExit();
             _hoveredPiece = null;
         }
     }
+
+    // ─── Click ────────────────────────────────────────────────────────────────
 
     void CheckClick()
     {
@@ -53,52 +58,54 @@ public class SelectChess : MonoBehaviour
         {
             if (_selectedPiece != null)
             {
-                _selectedPiece.position -= Vector3.up * 0.5f;
+                _selectedPiece.OnDeselect();
                 _selectedPiece = null;
             }
             return;
         }
 
-        // Left click
         if (!Input.GetMouseButtonDown(0)) return;
         if (EventSystem.current.IsPointerOverGameObject()) return;
 
-        Transform hit = GetPieceUnderMouse();
+        ChessBehaviour hit = GetPieceUnderMouse();
 
-        // Double click check
+        // Double-click: second click on the already-selected piece within threshold
         if (_waitingForDoubleClick && hit == _selectedPiece)
         {
-            // Second click landed within threshold on the same piece
             _waitingForDoubleClick = false;
             _doubleClickTimer = 0f;
-            Debug.Log("Double Click");
+            _selectedPiece.OnDoubleClick();
             return;
         }
 
-        // Select
+        // Select a new piece
         if (hit != null && _selectedPiece == null)
         {
             _selectedPiece = hit;
-            if (_hoveredPiece == null)
-                _selectedPiece.position += Vector3.up * 0.5f;
+
+            // If it was hovered, the piece is already lifted — just take ownership
+            bool wasHovered = (_hoveredPiece == hit);
+            _selectedPiece.OnSelect(wasHovered);
             _hoveredPiece = null;
 
-            // Start waiting to see if a second click comes
             _waitingForDoubleClick = true;
             _doubleClickTimer = 0f;
         }
+    }
 
-        // Tick double click timer
-        if (_waitingForDoubleClick)
+    void TickDoubleClickTimer()
+    {
+        if (!_waitingForDoubleClick) return;
+
+        _doubleClickTimer += Time.deltaTime;
+        if (_doubleClickTimer >= DoubleClickThreshold)
         {
-            _doubleClickTimer += Time.deltaTime;
-            if (_doubleClickTimer >= _doubleClickThreshold)
-            {
-                _waitingForDoubleClick = false;
-                _doubleClickTimer = 0f;
-            }
+            _waitingForDoubleClick = false;
+            _doubleClickTimer = 0f;
         }
     }
+
+    // ─── Raycasts ─────────────────────────────────────────────────────────────
 
     Vector2Int GetSquareUnderMouse()
     {
@@ -111,12 +118,12 @@ public class SelectChess : MonoBehaviour
         return -Vector2Int.one;
     }
 
-    Transform GetPieceUnderMouse()
+    ChessBehaviour GetPieceUnderMouse()
     {
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
         foreach (RaycastHit hit in Physics.RaycastAll(ray, Mathf.Infinity))
             if (hit.transform.CompareTag("ChessPiece"))
-                return hit.transform;
+                return hit.transform.GetComponent<ChessBehaviour>();
         return null;
     }
 }

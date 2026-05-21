@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 422291813509647404}
   - component: {fileID: 6144040542033361497}
   - component: {fileID: 7927951919185994372}
+  - component: {fileID: -1833777178101820323}
   m_Layer: 0
   m_Name: ChessPiece
   m_TagString: ChessPiece
@@ -112,3 +113,17 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1.5, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &-1833777178101820323
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2450982419937506835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ff7aec90d8ede243aad7f58f02e7ee4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ChessBehaviour
+  mainCamera: {fileID: 7130714654557573882, guid: 6753b1ae78e303d48a224e32908572d1, type: 3}
+  selector: {fileID: 8814442984692711642, guid: 9bbdfbe312777574d83982641e93ebc7, type: 3}
